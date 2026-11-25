@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aphrodite AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1020;color:#fff;font-family:Arial,sans-serif}
+header{padding:22px;background:#151b30;border-bottom:1px solid #343b55}
+h1{margin:0;color:#c4a5ff}
+header p{color:#aab1c5;margin-bottom:0}
+main{max-width:750px;margin:auto;padding:20px}
+.card{background:#151b30;padding:20px;border-radius:15px;margin:16px 0}
+input,textarea,button{width:100%;padding:14px;border-radius:9px;border:1px solid #39415b;background:#202943;color:white;margin-top:10px}
+button{background:#8056df;border:0;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5}
+#answer{white-space:pre-wrap;line-height:1.6;color:#d9dff0}
+.small{font-size:13px;color:#9ca8c4}
+</style>
+</head>
+<body>
+<header>
+<h1>APHRODITE</h1>
+<p>Your personal AI stock research assistant</p>
+</header>
+<main>
+<div class="card">
+<h3>AI Research Assistant</h3>
+<p class="small">Ask questions about stocks, markets, strategies and investing.</p>
+<textarea id="question" rows="4" placeholder="Example: Analyse ITC using fundamental and technical analysis..."></textarea>
+<button id="ask" onclick="askAI()">Ask Aphrodite</button>
+</div>
+<div class="card">
+<h3>Aphrodite's response</h3>
+<div id="answer">Your AI assistant is ready. Ask your first question.</div>
+</div>
+<div class="card">
+<h3>Stock Research</h3>
+<input id="stock" placeholder="Enter stock name or NSE symbol">
+<button onclick="research()">Research stock</button>
+</div>
+</main>
+<script>
+const https://aphrodite-ai.pgowtham2k.workers.dev/";
+
+async function askAI(){
+const message=document.getElementById("question").value.trim();
+if(!message)return;
+const answer=document.getElementById("answer");
+const button=document.getElementById("ask");
+button.disabled=true;
+answer.textContent="Aphrodite is thinking...";
+try{
+const response=await fetch(API_URL,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({message})
+});
+const data=await response.json();
+if(!response.ok)throw new Error(data.error||"Request failed");
+answer.textContent=data.answer||"No answer received.";
+}catch(e){
+answer.textContent="Connection error: "+e.message;
+}finally{
+button.disabled=false;
+}
+}
+
+function research(){
+const stock=document.getElementById("stock").value.trim();
+if(stock){
+document.getElementById("question").value=
+"Research "+stock+". Explain its business, fundamentals, risks and technical analysis. Clearly identify any data that needs live verification.";
+askAI();
+}
+}
+</script>
+</body>
+</html>
