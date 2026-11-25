@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090e1c">
+<title>Aphrodite AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090e1c;color:#eef3ff;font-family:Arial}
+header{padding:20px;background:#111a2c;font-size:23px;font-weight:bold}
+header span{color:#70a5ff}
+nav{display:flex;overflow:auto;gap:7px;padding:12px}
+button{background:#243653;color:white;border:0;padding:12px;border-radius:8px;cursor:pointer}
+button.active{background:#3868bd}
+main{padding:15px;max-width:1000px;margin:auto}
+section{display:none}
+section.active{display:block}
+.card{background:#111a2c;border:1px solid #293954;border-radius:12px;padding:16px;margin:12px 0}
+input,textarea,select{width:100%;padding:12px;margin:8px 0;background:#0b1425;color:white;border:1px solid #35445e;border-radius:8px}
+textarea{min-height:100px}
+.muted{color:#9aabc4;font-size:13px}
+table{width:100%;border-collapse:collapse}
+td,th{text-align:left;padding:10px;border-bottom:1px solid #35445e;font-size:13px}
+.wrap{overflow-x:auto}
+.green{color:#3cdda5}
+</style>
+</head>
+<body>
+<header>APHRODITE <span>AI</span><div class="muted">STOCK MARKET INTELLIGENCE</div></header>
+<nav>
+<button class="active" onclick="tab('home',this)">Home</button>
+<button onclick="tab('screen',this)">Screener</button>
+<button onclick="tab('research',this)">AI Research</button>
+<button onclick="tab('theory',this)">Theory Lab</button>
+<button onclick="tab('portfolio',this)">Portfolio</button>
+</nav>
+<main>
+
+<section id="home" class="active">
+<h2>Welcome to Aphrodite</h2>
+<p class="muted">Your personal investment research workspace.</p>
+<div class="card">
+<h3>What would you like to study?</h3>
+<textarea id="command" placeholder="Example: Find stocks with 10% growth over the last month..."></textarea>
+<button onclick="runCommand()">Submit command</button>
+<div id="answer"></div>
+</div>
+<div class="card">
+<h3>Platform modules</h3>
+<p>✓ Natural language stock screening</p>
+<p>✓ Investment research workspace</p>
+<p>✓ Investment theory study</p>
+<p>✓ Portfolio tracking</p>
+</div>
+</section>
+
+<section id="screen">
+<h2>Stock Screener</h2>
+<div class="card">
+<p class="muted">Add your stock data manually for now.</p>
+<input id="stock" placeholder="Stock name / NSE ticker">
+<input id="price" type="number" placeholder="Current price ₹">
+<input id="change" type="number" placeholder="Percentage change">
+<button onclick="addStock()">Add stock</button>
+</div>
+<div class="card wrap">
+<table><thead><tr><th>Stock</th><th>Price ₹</th><th>Change %</th></tr></thead>
+<tbody id="stocks"></tbody></table>
+</div>
+</section>
+
+<section id="research">
+<h2>AI Research</h2>
+<div class="card">
+<p>Research questions and save your findings.</p>
+<textarea id="researchInput" placeholder="Enter a stock or investment research question"></textarea>
+<button onclick="saveText('researchInput','researchList')">Save research question</button>
+<div id="researchList"></div>
+<p class="muted">AI analysis requires connecting an AI service in a later development step.</p>
+</div>
+</section>
+
+<section id="theory">
+<h2>Investment Theory Lab</h2>
+<div class="card">
+<p>Study investment theories and build your own strategy library.</p>
+<input id="theoryName" placeholder="Theory / scholar name">
+<textarea id="theoryNotes" placeholder="Enter principles, formulas, assumptions and findings"></textarea>
+<button onclick="saveTheory()">Save theory</button>
+<div id="theoryList"></div>
+</div>
+</section>
+
+<section id="portfolio">
+<h2>Portfolio Tracker</h2>
+<div class="card">
+<input id="holding" placeholder="Stock name">
+<input id="quantity" type="number" placeholder="Quantity">
+<input id="buy" type="number" placeholder="Buy price ₹">
+<input id="current" type="number" placeholder="Current price ₹">
+<button onclick="addHolding()">Add holding</button>
+</div>
+<div class="card wrap">
+<table><thead><tr><th>Stock</th><th>Quantity</th><th>Invested</th><th>Value</th><th>P/L</th></tr></thead>
+<tbody id="holdings"></tbody></table>
+</div>
+</section>
+</main>
+
+<script>
+const getData=(key)=>JSON.parse(localStorage.getItem(key)||"[]");
+const putData=(key,data)=>localStorage.setItem(key,JSON.stringify(data));
+
+function tab(id,btn){
+document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+btn.classList.add("active");
+}
+
+function runCommand(){
+let q=document.getElementById("command").value.trim();
+if(!q)return;
+document.getElementById("answer").innerHTML=
+'<div class="card"><b>Your screening request</b><p></p><span class="muted">Request saved. Live market scanning and AI interpretation will be connected in a later version.</span></div>';
+document.getElementById("answer").querySelector("p").textContent=q;
+let a=getData("aphroditerequests");a.push(q);putData("aphroditerequests",a);
+}
+
+function addStock(){
+let name=document.getElementById("stock").value.trim();
+let price=Number(document.getElementById("price").value);
+let change=Number(document.getElementById("change").value);
+if(!name||price<=0||!Number.isFinite(change))return alert("Enter valid stock details");
+let a=getData("aphroditestocks");a.push({name,price,change});putData("aphroditestocks",a);renderStocks();
+}
+function renderStocks(){
+document.getElementById("stocks").innerHTML=getData("aphroditestocks").map(s=>
+`<tr><td>${escapeHTML(s.name)}</td><td>${s.price}</td><td>${s.change}%</td></tr>`).join("");
+}
+function addHolding(){
+let name=document.getElementById("holding").value.trim();
+let qty=Number(document.getElementById("quantity").value);
+let buy=Number(document.getElementById("buy").value);
+let current=Number(document.getElementById("current").value);
+if(!name||qty<=0||buy<=0||current<=0)return alert("Enter valid holding details");
+let a=getData("aphroditeholdings");a.push({name,qty,buy,current});putData("aphroditeholdings",a);renderHoldings();
+}
+function renderHoldings(){
+document.getElementById("holdings").innerHTML=getData("aphroditeholdings").map(h=>{
+let invested=h.qty*h.buy,value=h.qty*h.current;
+return `<tr><td>${escapeHTML(h.name)}</td><td>${h.qty}</td><td>₹${invested.toFixed(2)}</td><td>₹${value.toFixed(2)}</td><td class="${value>=invested?'green':''}">₹${(value-invested).toFixed(2)}</td></tr>`;
+}).join("");
+}
+function saveText(input,list){
+let value=document.getElementById(input).value.trim();if(!value)return;
+let a=getData("aphroditeResearch");a.push(value);putData("aphroditeResearch",a);renderResearch();
+}
+function renderResearch(){
+document.getElementById("researchList").innerHTML=getData("aphroditeResearch").map(x=>`<div class="card">${escapeHTML(x)}</div>`).join("");
+}
+function saveTheory(){
+let name=document.getElementById("theoryName").value.trim();
+let notes=document.getElementById("theoryNotes").value.trim();
+if(!name||!notes)return alert("Enter theory and notes");
+let a=getData("aphroditeTheories");a.push({name,notes});putData("aphroditeTheories",a);renderTheories();
+}
+function renderTheories(){
+document.getElementById("theoryList").innerHTML=getData("aphroditeTheories").map(t=>`<div class="card"><b>${escapeHTML(t.name)}</b><p>${escapeHTML(t.notes)}</p></div>`).join("");
+}
+function escapeHTML(s){
+return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+renderStocks();renderHoldings();renderResearch();renderTheories();
+</script>
+</body>
+</html>
